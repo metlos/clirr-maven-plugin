@@ -1,0 +1,8 @@
+= Fork of Clirr Maven Plugin
+
+In this repository I keep the patches against various versions of the
+http://mojo.codehaus.org/clirr-maven-plugin/[Clirr Maven Plugin].
+
+The master branch is empty. There is a branch for each upstream version
+with the patches on top of it.
+
