@@ -4,6 +4,10 @@ public class Class1 extends Base implements Serializable {
 
     public float publicField;
     
+    public Class1(int i, float j) {
+
+    }
+
     class SubClass {
         
     }

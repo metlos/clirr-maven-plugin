@@ -4,8 +4,12 @@ public class Class1 extends Base implements Serializable {
     
     public int publicField;
     
-    class SubClass {
+    public Class1(int i, int j) {
+
+    }
         
+    class SubClass {
+        public SubClass(int i) {}
     }
     
     public void voidMethod() {

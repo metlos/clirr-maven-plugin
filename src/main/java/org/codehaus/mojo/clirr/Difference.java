@@ -121,31 +121,31 @@ public class Difference
                             String value = parser.nextText().trim();
                             if ( "className".equals( name ) )
                             {
-                                current.className = value;
+                                current.setClassName( value );
                             }
                             else if ( "differenceType".equals( name ) )
                             {
-                                current.differenceType = Integer.parseInt( value );
+                                current.setDifferenceType(Integer.parseInt(value));
                             }
                             else if ( "field".equals( name ) )
                             {
-                                current.field = value;
+                                current.setField( value );
                             }
                             else if ( "method".equals( name ) )
                             {
-                                current.method = value;
+                                current.setMethod( value );
                             }
                             else if ( "from".equals( name ) )
                             {
-                                current.from = value;
+                                current.setFrom( value );
                             }
                             else if ( "to".equals( name ) )
                             {
-                                current.to = value;
+                                current.setTo( value );
                             }
                             else if ( "justification".equals( name ) )
                             {
-                                current.justification = value;
+                                current.setJustification( value );
                             }
                             break;
                     }
@@ -315,7 +315,7 @@ public class Difference
 
     public void setMethod( String method )
     {
-        this.method = method;
+        this.method = normalizeSignature( method );
     }
 
     public String getFrom()
@@ -426,7 +426,8 @@ public class Difference
             case 7004: // Method Argument Count Changed
                 return matches7004( apiDiff ) ? Result.matched() : Result.notMatched();
             case 7005: // Method Argument Type changed
-                return Result.deferred( getDifferentiatorFor7005( apiDiff ) );
+                return methodMatches7005( apiDiff ) ? Result.deferred( getDifferentiatorFor7005( apiDiff ) ) :
+                    Result.notMatched();
             case 7006: // Method Return Type changed
                 return matches7006( apiDiff ) ? Result.matched() : Result.notMatched();
             case 7007: // Method has been Deprecated
@@ -728,7 +729,16 @@ public class Difference
             newType = replaceNthArgumentType( newType, idx, diffNewType );
         }
 
-        return SelectorUtils.matchPath( to, newType );
+        return SelectorUtils.matchPath( normalizeSignature( to ), newType );
+    }
+
+    private boolean methodMatches7005( ApiDifference apiDiff )
+    {
+        throwIfMissing( false, true, false, true );
+
+        String methodSig = removeVisibilityFromMethodSignature( apiDiff );
+
+        return SelectorUtils.matchPath( method, methodSig );
     }
 
     /**
@@ -746,7 +756,7 @@ public class Difference
 
         String newRetType = getArgs( apiDiff )[0];
 
-        return SelectorUtils.matchPath( to, newRetType );
+        return SelectorUtils.matchPath( to.trim(), newRetType );
     }
 
     /**
@@ -970,7 +980,7 @@ public class Difference
 
             String type = paramIdx == idx ? newType : signature.substring( commaIdx, nextCommaIdx );
 
-            bld.append( type );
+            bld.append( type.trim() );
             bld.append( ", " );
 
             commaIdx = nextCommaIdx + 1;
@@ -1008,6 +1018,25 @@ public class Difference
         else
         {
             return methodSig.substring( spaceIdx + 1 );
+        }
+    }
+
+    private String normalizeSignature( String method )
+    {
+        method = method.trim();
+
+        int firstSpaceIdx = method.indexOf( ' ' );
+        int firstParenIdx = method.indexOf( '(' );
+
+        if ( firstSpaceIdx > -1 && ( firstSpaceIdx < firstParenIdx || firstParenIdx == -1 ) )
+        {
+            String type = method.substring( 0, firstSpaceIdx );
+
+            return type.trim() + " " + method.substring( firstSpaceIdx + 1 ).replaceAll( "\\s+", "" ).replaceAll( ",", ", " );
+        }
+        else
+        {
+            return method.replaceAll( "\\s+", "" ).replaceAll( ",", ", " );
         }
     }
 }

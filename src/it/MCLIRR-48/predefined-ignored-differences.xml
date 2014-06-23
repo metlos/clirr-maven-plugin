@@ -73,4 +73,10 @@
         <method>java.lang.String returnSubClass2()</method>
         <to>Class1$SubClass</to>        
     </difference>
+    <difference>
+        <className>Class1</className>
+        <differenceType>7005</differenceType>
+        <method>Class1(int,int)</method>
+        <to>Class1(int,float)</to>
+    </difference>
 </differences>
